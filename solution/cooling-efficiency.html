@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belimo SmartGuard - Cooling Efficiency</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #FF6600;
+            --red-alert: #FF3B30;
+            --yellow-alert: #FFC107;
+            --blue-alert: #007AFF;
+            --green-success: #34C759;
+            --background: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #343A40;
+            --text-secondary: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        /* Layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Tabs Section */
+        .tabs-section {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        /* Main Visualization */
+        .main-visualization {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 0 0 auto;
+        }
+        
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .visualization-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .visualization-header .controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            background-color: var(--background);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-btn i {
+            margin-right: 8px;
+        }
+        
+        /* KPI Section */
+        .kpi-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .kpi-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .kpi-icon.blue {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: var(--blue-alert);
+        }
+        
+        .kpi-icon.green {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--green-success);
+        }
+        
+        .kpi-icon.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .kpi-icon.red {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .kpi-change {
+            font-size: 14px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .kpi-change i {
+            margin-right: 4px;
+        }
+        
+        .kpi-change.positive {
+            color: var(--green-success);
+        }
+        
+        .kpi-change.negative {
+            color: var(--red-alert);
+        }
+        
+        /* Data Cards */
+        .data-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .data-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .data-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .data-card-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .data-card-header .more {
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        
+        .chart-container {
+            flex: 1;
+            width: 100%;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .data-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .stat-value.up, .stat-value.positive {
+            color: var(--green-success);
+        }
+        
+        .stat-value.down, .stat-value.negative {
+            color: var(--red-alert);
+        }
+        
+        /* Ghost Heat Table */
+        .ghost-heat-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .ghost-heat-table th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--background);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .ghost-heat-table td {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        
+        .ghost-heat-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.blue {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: var(--blue-alert);
+        }
+        
+        .status-badge.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        /* Rack Efficiency Map */
+        .rack-efficiency-map {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 20px;
+        }
+        
+        .rack-row {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .rack-cell {
+            flex: 1;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .rack-label {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        .rack-value {
+            font-size: 14px;
+        }
+        
+        .efficiency-normal {
+            background-color: rgba(52, 199, 89, 0.7);
+        }
+        
+        .efficiency-overcooling {
+            background-color: rgba(0, 122, 255, 0.7);
+        }
+        
+        .efficiency-wastage {
+            background-color: rgba(255, 193, 7, 0.7);
+        }
+        
+        .flow-direction {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.4;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Navigation Bar -->
+            <div class="top-nav">
+                <div class="page-title">
+                    <h1>Cooling Efficiency Optimization</h1>
+                    <p>Dynamic HVAC performance analysis & energy waste detection</p>
+                </div>
+            </div>
+            
+            <!-- Tabs Section -->
+            <div class="tabs-section">
+                <div class="tab">Thermal Fingerprinting</div>
+                <div class="tab">Airflow Analysis</div>
+                <div class="tab active">Cooling Efficiency</div>
+                <div class="tab">Humidity Control</div>
+                <div class="tab">Predictive Maintenance</div>
+            </div>
+            
+            <!-- KPI Section -->
+            <div class="kpi-section">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="kpi-title">Energy Savings (Monthly)</div>
+                    </div>
+                    <div class="kpi-value">26.4%</div>
+                    <div class="kpi-change positive">
+                        <i class="fas fa-arrow-up"></i> 3.2% from last month
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon blue">
+                            <i class="fas fa-snowflake"></i>
+                        </div>
+                        <div class="kpi-title">Overall Cooling Efficiency</div>
+                    </div>
+                    <div class="kpi-value">82.7%</div>
+                    <div class="kpi-change positive">
+                        <i class="fas fa-arrow-up"></i> 4.8% from baseline
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon yellow">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="kpi-title">Ghost Heat Zones</div>
+                    </div>
+                    <div class="kpi-value">3</div>
+                    <div class="kpi-change negative">
+                        <i class="fas fa-arrow-down"></i> 2 fewer than last week
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon red">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="kpi-title">Cost Reduction (Annual)</div>
+                    </div>
+                    <div class="kpi-value">$48,250</div>
+                    <div class="kpi-change positive">
+                        <i class="fas fa-arrow-up"></i> $4,320 from projection
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Visualization -->
+            <div class="main-visualization">
+                <div class="visualization-header">
+                    <h2>Rack-Level Cooling Efficiency Heat Map</h2>
+                    <div class="controls">
+                        <div class="control-btn">
+                            <i class="fas fa-calendar"></i>
+                            <span>Last 7 Days</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Trend View</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-download"></i>
+                            <span>Export</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rack-efficiency-map">
+                    <div class="rack-row">
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A1</span>
+                            <span class="rack-value">92%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A2</span>
+                            <span class="rack-value">88%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A3</span>
+                            <span class="rack-value">91%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A4</span>
+                            <span class="rack-value">87%</span>
+                        </div>
+                        <div class="rack-cell efficiency-wastage">
+                            <span class="rack-label">A5</span>
+                            <span class="rack-value">73%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-down"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-wastage">
+                            <span class="rack-label">A6</span>
+                            <span class="rack-value">68%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-down"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A7</span>
+                            <span class="rack-value">85%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">A8</span>
+                            <span class="rack-value">89%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rack-row">
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">B1</span>
+                            <span class="rack-value">84%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">B2</span>
+                            <span class="rack-value">85%</span>
+                        </div>
+                        <div class="rack-cell efficiency-overcooling">
+                            <span class="rack-label">B3</span>
+                            <span class="rack-value">126%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-up"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-overcooling">
+                            <span class="rack-label">B4</span>
+                            <span class="rack-value">118%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-up"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-overcooling">
+                            <span class="rack-label">B5</span>
+                            <span class="rack-value">132%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-up"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">B6</span>
+                            <span class="rack-value">91%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">B7</span>
+                            <span class="rack-value">88%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">B8</span>
+                            <span class="rack-value">87%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rack-row">
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C1</span>
+                            <span class="rack-value">90%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C2</span>
+                            <span class="rack-value">86%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C3</span>
+                            <span class="rack-value">84%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C4</span>
+                            <span class="rack-value">82%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C5</span>
+                            <span class="rack-value">85%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C6</span>
+                            <span class="rack-value">87%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C7</span>
+                            <span class="rack-value">89%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">C8</span>
+                            <span class="rack-value">91%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rack-row">
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D1</span>
+                            <span class="rack-value">86%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D2</span>
+                            <span class="rack-value">87%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D3</span>
+                            <span class="rack-value">84%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D4</span>
+                            <span class="rack-value">83%</span>
+                        </div>
+                        <div class="rack-cell efficiency-wastage">
+                            <span class="rack-label">D5</span>
+                            <span class="rack-value">62%</span>
+                            <div class="flow-direction">
+                                <i class="fas fa-long-arrow-alt-left"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D6</span>
+                            <span class="rack-value">88%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D7</span>
+                            <span class="rack-value">90%</span>
+                        </div>
+                        <div class="rack-cell efficiency-normal">
+                            <span class="rack-label">D8</span>
+                            <span class="rack-value">92%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                    <div style="display: flex; align-items: center; margin-right: 20px;">
+                        <div style="width: 12px; height: 12px; background-color: rgba(52, 199, 89, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                        <span style="font-size: 12px;">Optimal Cooling (80-95%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-right: 20px;">
+                        <div style="width: 12px; height: 12px; background-color: rgba(0, 122, 255, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                        <span style="font-size: 12px;">Overcooling (>100%)</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 12px; height: 12px; background-color: rgba(255, 193, 7, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                        <span style="font-size: 12px;">Cooling Inefficiency (<75%)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Cards -->
+            <div class="data-section">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>"Ghost Heat" Analysis</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <table class="ghost-heat-table">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Overcooling</th>
+                                <th>Energy Waste</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Rack B3</td>
+                                <td>+26%</td>
+                                <td>8.4 kWh/day</td>
+                                <td><span class="status-badge blue">Active</span></td>
+                                <td><a href="#" style="color: var(--primary-color);">Optimize</a></td>
+                            </tr>
+                            <tr>
+                                <td>Rack B4</td>
+                                <td>+18%</td>
+                                <td>6.2 kWh/day</td>
+                                <td><span class="status-badge blue">Active</span></td>
+                                <td><a href="#" style="color: var(--primary-color);">Optimize</a></td>
+                            </tr>
+                            <tr>
+                                <td>Rack B5</td>
+                                <td>+32%</td>
+                                <td>10.8 kWh/day</td>
+                                <td><span class="status-badge blue">Active</span></td>
+                                <td><a href="#" style="color: var(--primary-color);">Optimize</a></td>
+                            </tr>
+                            <tr>
+                                <td>Rack E7</td>
+                                <td>+14%</td>
+                                <td>4.5 kWh/day</td>
+                                <td><span class="status-badge yellow">Resolved</span></td>
+                                <td><a href="#" style="color: var(--text-secondary);">View History</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Cooling Energy Trend</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/220" alt="Cooling Energy Trend Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">Avg. Daily Usage</div>
+                            <div class="stat-value">284 kWh</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Peak Reduction</div>
+                            <div class="stat-value positive">-32.6%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">CO₂ Reduction</div>
+                            <div class="stat-value positive">26.4 tons</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Airflow Distribution Analysis</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/220" alt="Airflow Distribution Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">Balanced Flow</div>
+                            <div class="stat-value">72%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Dead Zones</div>
+                            <div class="stat-value">3</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Improvement</div>
+                            <div class="stat-value positive">+8.2%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Optimization Recommendations</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 0 10px;">
+                        <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                            <div style="width: 32px; height: 32px; border-radius: 6px; background-color: rgba(0, 122, 255, 0.1); color: var(--blue-alert); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-snowflake"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 4px;">Reduce cooling in B-row by 25%</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Overcooling detected in racks B3-B5. Adjust CRAC unit 2 setpoint.</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="background-color: rgba(52, 199, 89, 0.1); color: var(--green-success); padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 12px;">High Impact</span>
+                                <button style="background-color: var(--primary-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;">Apply</button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                            <div style="width: 32px; height: 32px; border-radius: 6px; background-color: rgba(255, 193, 7, 0.1); color: var(--yellow-alert); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 4px;">Rebalance airflow in A5-A6 zone</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Adjust floor vents to improve air distribution in low efficiency area.</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="background-color: rgba(255, 193, 7, 0.1); color: var(--yellow-alert); padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 12px;">Medium Impact</span>
+                                <button style="background-color: var(--primary-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;">Apply</button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                            <div style="width: 32px; height: 32px; border-radius: 6px; background-color: rgba(255, 59, 48, 0.1); color: var(--red-alert); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 4px;">Check for blockage behind rack D5</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Low efficiency detected. Possible obstruction in airflow path.</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="background-color: rgba(255, 59, 48, 0.1); color: var(--red-alert); padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 12px;">Urgent</span>
+                                <button style="background-color: var(--primary-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;">Assign</button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; padding: 12px 0;">
+                            <div style="width: 32px; height: 32px; border-radius: 6px; background-color: rgba(52, 199, 89, 0.1); color: var(--green-success); display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 4px;">Schedule maintenance for CRAC unit 2</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Unit showing signs of reduced efficiency. Preventive check recommended.</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="background-color: rgba(52, 199, 89, 0.1); color: var(--green-success); padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 12px;">Scheduled</span>
+                                <button style="background-color: var(--background); color: var(--text-primary); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;">View</button>
+                            </div>
+                        </div>
+                    </div>

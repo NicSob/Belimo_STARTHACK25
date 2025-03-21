@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belimo SmartGuard Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #FF6600;
+            --red-alert: #FF3B30;
+            --yellow-alert: #FFC107;
+            --blue-alert: #007AFF;
+            --background: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #343A40;
+            --text-secondary: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        /* Layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo img {
+            height: 36px;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .risk-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .risk-section h2 span {
+            cursor: pointer;
+        }
+        
+        .risk-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .risk-item:hover {
+            background-color: var(--background);
+        }
+        
+        .risk-item.active {
+            background-color: rgba(255, 102, 0, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .risk-item i {
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .risk-item.fire i {
+            color: var(--red-alert);
+        }
+        
+        .risk-item.cooling i {
+            color: var(--blue-alert);
+        }
+        
+        .risk-item.airflow i {
+            color: var(--yellow-alert);
+        }
+        
+        .risk-count {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: auto;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .user-controls {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-controls .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+        
+        .user-controls .icon-btn:hover {
+            background-color: var(--background);
+        }
+        
+        .user-controls .profile {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 8px 16px;
+            border-radius: 24px;
+            margin-left: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        
+        .user-controls .profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        
+        /* Alerts Section */
+        .alerts-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .alert-card {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            background-color: var(--card-bg);
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
+        
+        .alert-card.red {
+            border-left-color: var(--red-alert);
+        }
+        
+        .alert-card.yellow {
+            border-left-color: var(--yellow-alert);
+        }
+        
+        .alert-card.blue {
+            border-left-color: var(--blue-alert);
+        }
+        
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 20px;
+        }
+        
+        .alert-card.red .alert-icon {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .alert-card.yellow .alert-icon {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .alert-card.blue .alert-icon {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: var(--blue-alert);
+        }
+        
+        .alert-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .alert-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* Tab Section */
+        .tabs-section {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        /* Main Visualization */
+        .main-visualization {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .visualization-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .visualization-header .controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            background-color: var(--background);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-btn i {
+            margin-right: 8px;
+        }
+        
+        .heatmap-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #F0F3F5;
+        }
+        
+        .heatmap {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 4px;
+            padding: 8px;
+        }
+        
+        .zone {
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .zone:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .zone.normal {
+            background-color: rgba(52, 199, 89, 0.6);
+        }
+        
+        .zone.fire-risk {
+            background-color: rgba(255, 59, 48, 0.7);
+        }
+        
+        .zone.cooling {
+            background-color: rgba(0, 122, 255, 0.7);
+        }
+        
+        .zone.inefficient {
+            background-color: rgba(255, 193, 7, 0.7);
+        }
+        
+        /* Data Cards */
+        .data-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .data-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .data-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .data-card-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .data-card-header .more {
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        
+        .chart-container {
+            flex: 1;
+            width: 100%;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .data-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .stat-value.up {
+            color: #34C759;
+        }
+        
+        .stat-value.down {
+            color: var(--red-alert);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar - Risk Panel -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="/api/placeholder/120/36" alt="Belimo SmartGuard">
+                <h1>SmartGuard</h1>
+            </div>
+            
+            <div class="risk-section">
+                <h2>Risk Overview <span><i class="fas fa-chevron-down"></i></span></h2>
+                
+                <div class="risk-item fire active">
+                    <i class="fas fa-fire"></i>
+                    <span>Pre-Fire Risks</span>
+                    <div class="risk-count">3</div>
+                </div>
+                
+                <div class="risk-item cooling">
+                    <i class="fas fa-snowflake"></i>
+                    <span>Cooling Inefficiencies</span>
+                    <div class="risk-count">2</div>
+                </div>
+                
+                <div class="risk-item airflow">
+                    <i class="fas fa-wind"></i>
+                    <span>Airflow Disruptions</span>
+                    <div class="risk-count">5</div>
+                </div>
+                
+                <div class="risk-item">
+                    <i class="fas fa-tint"></i>
+                    <span>Humidity Risks</span>
+                    <div class="risk-count">1</div>
+                </div>
+                
+                <div class="risk-item">
+                    <i class="fas fa-tools"></i>
+                    <span>Maintenance Alerts</span>
+                    <div class="risk-count">2</div>
+                </div>
+            </div>
+            
+            <div class="risk-section">
+                <h2>Rack Monitoring <span><i class="fas fa-chevron-down"></i></span></h2>
+                
+                <div class="risk-item">
+                    <i class="fas fa-server"></i>
+                    <span>Rack A-1</span>
+                </div>
+                
+                <div class="risk-item fire active">
+                    <i class="fas fa-server"></i>
+                    <span>Rack A-2</span>
+                    <div class="risk-count">1</div>
+                </div>
+                
+                <div class="risk-item cooling">
+                    <i class="fas fa-server"></i>
+                    <span>Rack B-1</span>
+                    <div class="risk-count">1</div>
+                </div>
+                
+                <div class="risk-item">
+                    <i class="fas fa-server"></i>
+                    <span>Rack B-2</span>
+                </div>
+                
+                <div class="risk-item airflow">
+                    <i class="fas fa-server"></i>
+                    <span>Rack C-1</span>
+                    <div class="risk-count">2</div>
+                </div>
+                
+                <div class="risk-item fire">
+                    <i class="fas fa-server"></i>
+                    <span>Rack C-2</span>
+                    <div class="risk-count">2</div>
+                </div>
+            </div>
+            
+            <div class="risk-section">
+                <h2>Monitoring Layers <span><i class="fas fa-chevron-down"></i></span></h2>
+                
+                <div class="risk-item">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Ceiling Sensors</span>
+                </div>
+                
+                <div class="risk-item">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Mid-Level Sensors</span>
+                </div>
+                
+                <div class="risk-item">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Floor Sensors</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Navigation Bar -->
+            <div class="top-nav">
+                <div class="page-title">
+                    <h1>HVAC Monitoring Dashboard</h1>
+                </div>
+                
+                <div class="user-controls">
+                    <div class="icon-btn">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="icon-btn">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="profile">
+                        <img src="/api/placeholder/32/32" alt="Profile">
+                        <span>Admin User</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Section -->
+            <div class="alerts-section">
+                <div class="alert-card red">
+                    <div class="alert-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h3>Pre-Fire Risk Detected</h3>
+                        <p>Rack A-2 thermal fingerprint anomaly detected</p>
+                    </div>
+                </div>
+                
+                <div class="alert-card yellow">
+                    <div class="alert-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h3>Airflow Disruption</h3>
+                        <p>Dead zone detected behind Rack C-1</p>
+                    </div>
+                </div>
+                
+                <div class="alert-card blue">
+                    <div class="alert-icon">
+                        <i class="fas fa-snowflake"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h3>"Ghost Heat" Detected</h3>
+                        <p>Rack B-1 overcooling by 12°C - energy waste</p>
+                    </div>
+                </div>
+                
+                <div class="alert-card yellow">
+                    <div class="alert-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h3>Low Humidity Warning</h3>
+                        <p>Static electricity risk in Zone D - 18% humidity</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs Section -->
+            <div class="tabs-section">
+                <div class="tab active">Thermal Fingerprinting</div>
+                <div class="tab">Airflow Analysis</div>
+                <div class="tab">Cooling Efficiency</div>
+                <div class="tab">Humidity Control</div>
+                <div class="tab">Predictive Maintenance</div>
+            </div>
+            
+            <!-- Main Visualization -->
+            <div class="main-visualization">
+                <div class="visualization-header">
+                    <h2>Multi-Layer Heat Map Analysis</h2>
+                    <div class="controls">
+                        <div class="control-btn">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Ceiling View</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Rack View</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Floor View</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-download"></i>
+                            <span>Export</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="heatmap-container">
+                    <div class="heatmap">
+                        <div class="zone normal">A1</div>
+                        <div class="zone normal">A2</div>
+                        <div class="zone normal">A3</div>
+                        <div class="zone normal">A4</div>
+                        <div class="zone normal">A5</div>
+                        <div class="zone normal">A6</div>
+                        <div class="zone normal">A7</div>
+                        <div class="zone normal">A8</div>
+                        
+                        <div class="zone cooling">B1</div>
+                        <div class="zone fire-risk">B2</div>
+                        <div class="zone fire-risk">B3</div>
+                        <div class="zone normal">B4</div>
+                        <div class="zone normal">B5</div>
+                        <div class="zone normal">B6</div>
+                        <div class="zone normal">B7</div>
+                        <div class="zone normal">B8</div>
+                        
+                        <div class="zone inefficient">C1</div>
+                        <div class="zone fire-risk">C2</div>
+                        <div class="zone fire-risk">C3</div>
+                        <div class="zone normal">C4</div>
+                        <div class="zone inefficient">C5</div>
+                        <div class="zone inefficient">C6</div>
+                        <div class="zone normal">C7</div>
+                        <div class="zone normal">C8</div>
+                        
+                        <div class="zone cooling">D1</div>
+                        <div class="zone cooling">D2</div>
+                        <div class="zone normal">D3</div>
+                        <div class="zone normal">D4</div>
+                        <div class="zone inefficient">D5</div>
+                        <div class="zone inefficient">D6</div>
+                        <div class="zone normal">D7</div>
+                        <div class="zone normal">D8</div>
+                        
+                        <div class="zone normal">E1</div>
+                        <div class="zone normal">E2</div>
+                        <div class="zone normal">E3</div>
+                        <div class="zone normal">E4</div>
+                        <div class="zone normal">E5</div>
+                        <div class="zone normal">E6</div>
+                        <div class="zone normal">E7</div>
+                        <div class="zone normal">E8</div>
+                        
+                        <div class="zone normal">F1</div>
+                        <div class="zone normal">F2</div>
+                        <div class="zone normal">F3</div>
+                        <div class="zone normal">F4</div>
+                        <div class="zone normal">F5</div>
+                        <div class="zone inefficient">F6</div>
+                        <div class="zone normal">F7</div>
+                        <div class="zone normal">F8</div>
+                    </div>
+                    
+                    <div class="legend" style="position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 6px; font-size: 12px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                            <div style="width: 12px; height: 12px; background-color: rgba(52, 199, 89, 0.6); margin-right: 5px; border-radius: 2px;"></div>
+                            <span>Normal Conditions</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                            <div style="width: 12px; height: 12px; background-color: rgba(255, 59, 48, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                            <span>Heat Buildup / Pre-Fire Risk</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                            <div style="width: 12px; height: 12px; background-color: rgba(0, 122, 255, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                            <span>Overcooling / "Ghost Heat"</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 12px; height: 12px; background-color: rgba(255, 193, 7, 0.7); margin-right: 5px; border-radius: 2px;"></div>
+                            <span>Airflow Disruption</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Cards & Charts -->
+            <div class="data-section">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Rack A-2 Thermal Fingerprint</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/200" alt="Thermal Fingerprint Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">Current Anomaly</div>
+                            <div class="stat-value up">+8.2°C</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Airflow Rate</div>
+                            <div class="stat-value down">-32%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Fire Risk</div>
+                            <div class="stat-value up">High</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Dynamic Cooling Optimization</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/200" alt="Cooling Efficiency Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">Energy Savings</div>
+                            <div class="stat-value down">-26.4%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Ghost Heat Zones</div>
+                            <div class="stat-value">3</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">CO₂ Reduction</div>
+                            <div class="stat-value down">-12.6t</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Predictive Maintenance Forecast</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/200" alt="Maintenance Forecast Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">HVAC Unit 2</div>
+                            <div class="stat-value">14 days</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Water Valve B3</div>
+                            <div class="stat-value">8 days</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Fan Array C</div>
+                            <div class="stat-value">32 days</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h2>Humidity Risk Analysis</h2>
+                        <div class="more">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <img src="/api/placeholder/400/200" alt="Humidity Risk Chart">
+                    </div>
+                    
+                    <div class="data-card-footer">
+                        <div class="stat">
+                            <div class="stat-label">Avg. Humidity</div>
+                            <div class="stat-value">42%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Static Risk Zones</div>
+                            <div class="stat-value">1</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Condensation Risk</div>
+                            <div class="stat-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // JavaScript could be added here for interactive elements
+            // This would include charts, event listeners, etc.
+        });
+    </script>
+</body>
+</html>

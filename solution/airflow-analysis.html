@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belimo SmartGuard - Airflow Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #FF6600;
+            --red-alert: #FF3B30;
+            --yellow-alert: #FFC107;
+            --blue-alert: #007AFF;
+            --green-success: #34C759;
+            --purple: #5856D6;
+            --background: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #343A40;
+            --text-secondary: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        /* Layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Tabs Section */
+        .tabs-section {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        /* KPI Section */
+        .kpi-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .kpi-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .kpi-icon.blue {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: var(--blue-alert);
+        }
+        
+        .kpi-icon.green {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--green-success);
+        }
+        
+        .kpi-icon.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .kpi-icon.red {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .kpi-icon.purple {
+            background-color: rgba(88, 86, 214, 0.1);
+            color: var(--purple);
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .kpi-change {
+            font-size: 14px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .kpi-change i {
+            margin-right: 4px;
+        }
+        
+        .kpi-change.positive {
+            color: var(--green-success);
+        }
+        
+        .kpi-change.negative {
+            color: var(--red-alert);
+        }
+        
+        /* Main Visualization */
+        .main-visualization {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .visualization-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .visualization-header .controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            background-color: var(--background);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Airflow Map */
+        .airflow-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            background-color: var(--background);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .airflow-map {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            height: 100%;
+            gap: 4px;
+            padding: 8px;
+        }
+        
+        .rack-cell {
+            background-color: #E9ECEF;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .rack-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        
+        .flow-arrow {
+            position: absolute;
+            color: var(--blue-alert);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .obstruction {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 14px;
+            height: 14px;
+            background-color: var(--red-alert);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+        }
+        
+        .dead-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 193, 7, 0.3);
+            border: 2px dashed var(--yellow-alert);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            z-index: 10;
+        }
+        
+        .airflow-good {
+            background-color: rgba(52, 199, 89, 0.2);
+        }
+        
+        .airflow-medium {
+            background-color: rgba(255, 193, 7, 0.2);
+        }
+        
+        .airflow-poor {
+            background-color: rgba(255, 59, 48, 0.2);
+        }
+        
+        .layer-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .layer-btn {
+            padding: 8px 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .layer-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        /* Data Cards */
+        .data-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .data-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .data-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .data-card-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .data-card-header .more {
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        
+        .chart-container {
+            flex: 1;
+            width: 100%;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .data-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .stat-value.up, .stat-value.positive {
+            color: var(--green-success);
+        }
+        
+        .stat-value.down, .stat-value.negative {
+            color: var(--red-alert);
+        }
+        
+        /* Airflow Status Table */
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .status-table th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--background);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status-table td {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        
+        .status-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.critical {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .status-badge.warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .status-badge.good {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--green-success);
+        }
+        
+        /* Recommendation Cards */
+        .recommendation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .recommendation-item {
+            display: flex;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            align-items: center;
+        }
+        
+        .recommendation-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .recommendation-icon.red {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .recommendation-icon.yellow {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .recommendation-icon.blue {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: var(--blue-alert);
+        }
+        
+        .recommendation-content {
+            flex: 1;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .recommendation-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .recommendation-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .priority-badge.high {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: var(--red-alert);
+        }
+        
+        .priority-badge.medium {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--yellow-alert);
+        }
+        
+        .priority-badge.low {
+            background-color: rgba(52, 199, 89, 0.1);
+            color: var(--green-success);
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* 3D Visualization Option */
+        .visualization-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .view-toggle-btn {
+            padding: 8px 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .view-toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Navigation Bar -->
+            <div class="top-nav">
+                <div class="page-title">
+                    <h1>Advanced Airflow Analysis</h1>
+                    <p>Multi-layer airflow disruption detection and optimization</p>
+                </div>
+            </div>
+            
+            <!-- Tabs Section -->
+            <div class="tabs-section">
+                <div class="tab">Thermal Fingerprinting</div>
+                <div class="tab active">Airflow Analysis</div>
+                <div class="tab">Cooling Efficiency</div>
+                <div class="tab">Humidity Control</div>
+                <div class="tab">Predictive Maintenance</div>
+            </div>
+            
+            <!-- KPI Section -->
+            <div class="kpi-section">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="kpi-title">Optimal Airflow Zones</div>
+                    </div>
+                    <div class="kpi-value">72%</div>
+                    <div class="kpi-change positive">
+                        <i class="fas fa-arrow-up"></i> +6% from last month
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon yellow">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="kpi-title">Dead Zones Detected</div>
+                    </div>
+                    <div class="kpi-value">3</div>
+                    <div class="kpi-change positive">
+                        <i class="fas fa-arrow-down"></i> -2 from last month
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon red">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="kpi-title">Blocked Vents</div>
+                    </div>
+                    <div class="kpi-value">4</div>
+                    <div class="kpi-change negative">
+                        <i class="fas fa-arrow-up"></i> +1 from last week
+                    </div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon blue">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="kpi-title">Energy Impact</div>
+                    </div>
+                    <div class="kpi-value">18.5%</div>
+                    <div class="kpi-change negative">
+                        <i class="fas fa-arrow-up"></i> +2.3% excess usage
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View Toggle -->
+            <div class="visualization-toggle">
+                <div class="view-toggle-btn active">
+                    <i class="fas fa-th"></i>
+                    <span>2D Map View</span>
+                </div>
+                <div class="view-toggle-btn">
+                    <i class="fas fa-cube"></i>
+                    <span>3D Visualization</span>
+                </div>
+            </div>
+            
+            <!-- Layer Selection -->
+            <div class="layer-controls">
+                <div class="layer-btn">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Ceiling View</span>
+                </div>
+                <div class="layer-btn active">
+                    <i class="fas fa-arrows-alt-h"></i>
+                    <span>Mid-Level View</span>
+                </div>
+                <div class="layer-btn">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Floor View</span>
+                </div>
+            </div>
+            
+            <!-- Main Visualization -->
+            <div class="main-visualization">
+                <div class="visualization-header">
+                    <h2>Multi-Layer Airflow Map (Mid-Level)</h2>
+                    <div class="controls">
+                        <div class="control-btn">
+                            <i class="fas fa-calendar"></i>
+                            <span>Real-time</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </div>
+                        <div class="control-btn">
+                            <i class="fas fa-download"></i>
+                            <span>Export</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="airflow-container">
+                    <div class="airflow-map">
+                        <!-- Row A -->
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A1</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A2</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A3</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A4</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A5</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A6</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A7</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">A8</span>
+                        </div>
+                        
+                        <!-- Row B -->
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">B1</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">B2</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">B3</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                            <div class="obstruction">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell airflow-poor">
+                            <span class="rack-label">B4</span>
+                            <div class="dead-zone">Dead Zone</div>
+                        </div>
+                        <div class="rack-cell airflow-poor">
+                            <span class="rack-label">B5</span>
+                            <div class="dead-zone">Dead Zone</div>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">B6</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">B7</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">B8</span>
+                        </div>
+                        
+                        <!-- Row C -->
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">C1</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">C2</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                            <div class="obstruction">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell airflow-poor">
+                            <span class="rack-label">C3</span>
+                            <div class="dead-zone">Dead Zone</div>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">C4</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">C5</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">C6</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">C7</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">C8</span>
+                        </div>
+                        
+                        <!-- Row D -->
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D1</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D2</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D3</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-medium">
+                            <span class="rack-label">D4</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px; opacity: 0.5;"></i>
+                            <div class="obstruction">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D5</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D6</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D7</span>
+                            <i class="fas fa-arrow-right flow-arrow" style="right: -2px;"></i>
+                        </div>
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">D8</span>
+                        </div>
+                        
+                        <!-- Row E -->
+                        <div class="rack-cell airflow-good">
+                            <span class="rack-label">E1</span>
+                            <i class="fas fa-
